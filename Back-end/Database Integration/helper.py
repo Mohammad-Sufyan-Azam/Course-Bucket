@@ -39,10 +39,10 @@ def update_view(query):
     actual_query += '( '+ result + ' );'
 
 
-coursera_courses = ['Course number', 'Course_Name', 'University', 'Difficulty Level', 'Course Rating', 'Course_URL', 'CourseDescription', 'Skills', 'Price']
-skillshare_courses = ['id', 'Title', 'URL', 'students count', 'course duration', 'instructor', 'lessions count', 'level', 'student projects', 'engaging', 'clarity', 
+coursera_courses = ['Course_number', 'Course_Name', 'University', 'Difficulty_Level', 'Course_Rating', 'Course_URL', 'Course_Description', 'Skills', 'Price']
+skillshare_courses = ['id', 'Title', 'URL', 'students_count', 'course_duration', 'instructor', 'lessons_count', 'level', 'student_projects', 'engaging', 'clarity', 
                       'quality', 'price']
-udacity_courses = ['number', 'Name', 'School', 'Difficulty Level', 'Rating', 'Link', 'About', 'Price']
+udacity_courses = ['number', 'Name', 'School', 'Difficulty_Level', 'Rating', 'Link', 'About', 'Price']
 udemy_courses = ['course_id', 'course_title', 'url', 'is_paid', 'price', 'num_subscribers', 'num_reviews', 'num_lectures', 'level', 'content_duration', 
                  'published_timestamp', 'subject']
 nptel_courses = ['id', 'Discipline', 'Course Name', 'SME Name', 'Institute', 'Co-ordinating Institute', 'Duration', 'Type of course', 'Start date', 'End date', 
