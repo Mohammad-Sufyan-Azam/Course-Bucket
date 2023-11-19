@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Course Search</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            background: url('https://cutewallpaperhd.com/wp-content/uploads/2020/10/Black-Silk-Background-for-Wallpaper-768x432.jpg') no-repeat center center fixed; 
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">Course Search</h1>
+
+        <!-- Search Form -->
+        <form class="mb-4">
+            <div class="form-group">
+                <label for="course">Course</label>
+                <input type="text" class="form-control" id="course" placeholder="Enter course name">
+            </div>
+            <div class="form-group">
+                <label for="price">Price</label>
+                <select class="form-control" id="price">
+                    <option>Free</option>
+                    <option>Paid</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="institute">Institute</label>
+                <input type="text" class="form-control" id="institute" placeholder="Enter institute name">
+            </div>
+            <div class="form-group">
+                <label for="platform">Platform</label>
+                <input type="text" class="form-control" id="platform" placeholder="Enter platform name">
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+        <!-- Search Results -->
+        <h2>Search Results</h2>
+        <div class="list-group">
+            <!-- Dummy Course -->
+            <a href="#" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Course Name</h5>
+                    <small>Platform: Udemy</small>
+                </div>
+                <p class="mb-1">Course description...</p>
+                <small>Institute: XYZ</small>
+            </a>
+            <!-- More courses... -->
+        </div>
+    </div>
+
+    <!-- Search Results -->
+<h2>Popular Courses and New Arrivals !!</h2>
+<div class="list-group">
+    <!-- Dummy Course from Udemy -->
+    <a href="#" class="list-group-item list-group-item-action">
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">Web Development Bootcamp</h5>
+            <small>Platform: Udemy</small>
+        </div>
+        <p class="mb-1">Learn HTML, CSS, JavaScript and more to become a full-stack web developer.</p>
+        <small>Institute: Colt Steele</small>
+    </a>
+    <!-- Dummy Course from NPTEL -->
+    <a href="#" class="list-group-item list-group-item-action">
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">Introduction to Machine Learning</h5>
+            <small>Platform: NPTEL</small>
+        </div>
+        <p class="mb-1">A comprehensive introduction to the concepts and algorithms of machine learning.</p>
+        <small>Institute: IIT Madras</small>
+    </a>
+    <!-- Dummy Course from Coursera -->
+    <a href="#" class="list-group-item list-group-item-action">
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">Data Science Specialization</h5>
+            <small>Platform: Coursera</small>
+        </div>
+        <p class="mb-1">Master the skills needed to solve complex data science challenges.</p>
+        <small>Institute: Johns Hopkins University</small>
+    </a>
+    <!-- Dummy Course from Udacity -->
+    <a href="#" class="list-group-item list-group-item-action">
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">Android Developer Nanodegree</h5>
+            <small>Platform: Udacity</small>
+        </div>
+        <p class="mb-1">Learn to develop for Android and transform your career outlook!</p>
+        <small>Institute: Google</small>
+    </a>
+</div>
+
+
+    <!-- Include Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
+
