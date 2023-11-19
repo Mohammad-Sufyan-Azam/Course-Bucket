@@ -52,19 +52,44 @@ nptel_courses = ['id', 'Discipline', 'Course Name', 'SME Name', 'Institute', 'Co
 
 '''
 CREATE VIEW course_bucket4 AS (
-    (SELECT 'Course number' as course_id, Course_Name as course_name, 'Course Description' as course_description, University as university, Course_URL as course_url, Price as price, 
+    (SELECT 'Course_number' as course_id, Course_Name as course_name, 'Course_Description' as course_description, University as university, Course_URL as course_url, Price as price, 
     'coursera' AS course_vendor FROM coursera_courses) 
     Union 
-    (SELECT (1019 + id) as course_id, "Course Name" as course_name, ("Prof:"+'SME Name'+"Duration:"+Duration) as course_description, Institute as university, NPTEL_URL as course_url, 
+    (SELECT (1019 + id) as course_id, "Course_Name" as course_name, ("Prof:"+'SME_Name'+"Duration:"+Duration) as course_description, Institute as university, NPTEL_URL as course_url, 
     Price as price, 'nptel' AS course_vendor FROM nptel_courses) 
     Union 
-    (SELECT (1309 + id) as course_id, Title as course_name, ("Instructor:"+instructor+ " , course duration:"+'course duration') as course_description, "NA" as university, URL as course_url, 
+    (SELECT (1309 + id) as course_id, Title as course_name, ("Instructor:"+instructor+ " , course duration:"+'course_duration') as course_description, "NA" as university, URL as course_url, 
     price, 'skillshare' as course_vendor FROM skillshare_courses) 
     Union 
     (SELECT (1407 + number) as course_id, Name as course_name, About as course_description, School as university, Link as course_url, Price as price, 'udacity' AS course_vendor FROM udacity_courses) 
     Union 
-    (SELECT (1475 + course_id) as course_id, course_title as course_name, ("Subject:" + subject+",Number of lecture:"+num_lectures+"content_duration in hours:"+content_duration) as course_description, 
+    (SELECT (1475 + course_id) as course_id, course_title as course_name, ("Subject:" + subject+",Number_of_lecture:"+num_lectures+"content_duration in hours:"+content_duration) as course_description, 
     "NA" as university, url as course_url, price, 'udemy' AS course_vendor FROM udemy_courses) 
     );
+
+
+'''
+# UPDATE skillshare_courses SET price = FLOOR(500+RAND()*(4501)) WHERE id > 0;
+# UPDATE udacity_courses SET price = FLOOR(1000+RAND()*(9001)) WHERE udacity_courses.number > 0;
+# UPDATE coursera_courses SET Price = FLOOR(2000+RAND()*(8001)) WHERE course_number > 0;
+'''
+DELIMITER $$
+CREATE FUNCTION RandomString(length INT) RETURNS VARCHAR(300)
+DETERMINISTIC
+BEGIN
+  DECLARE result VARCHAR(255) DEFAULT '';
+  DECLARE alphabet VARCHAR(255) DEFAULT ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  DECLARE i INT DEFAULT 0;
+  
+  WHILE i < length DO
+    SET result = CONCAT(result, SUBSTRING(alphabet, FLOOR(1 + RAND() * LENGTH(alphabet)), 1));
+    SET i = i + 1;
+  END WHILE;
+  
+  RETURN result;
+END$$
+DELIMITER ;
+
+SELECT RandomString(100);
 
 '''
