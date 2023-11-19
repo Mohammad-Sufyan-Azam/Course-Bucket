@@ -28,7 +28,7 @@ def compute_similarity(query, string, weight=0.5):
     combined_similarity = weight * vector_similarity.toarray()[0][1] + (1 - weight) * cosine_sim[0][1]
     return combined_similarity
 
-mydb = mysql.connect(host="localhost",user="root",password="aA1zZ26")
+mydb = mysql.connect(host='localhost', user='root', password='Unique@32')
 mycursor = mydb.cursor()
 mycursor.execute("USE nptel")
 
@@ -240,3 +240,14 @@ while choice!=5:
 
 
 
+'''
+TODO:
+Total tasks that needs to be present - 
+1. Course searching based on jaccard, levelnshetin, cosine similarity
+    a. NLP techniques can be used to improve the search     --> Extra
+2. Adding a new data source     --> Aamleen
+3. Deleting a data source       --> Aamleen
+4. Adding some rows to a data source        --> Sufyan
+5. Deleting some rows from a data source    --> Sufyan
+6. Updating some rows in a data source      --> Sufyan
+'''

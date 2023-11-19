@@ -1,6 +1,6 @@
 import mysql.connector as mysql
 
-mydb = mysql.connect(host="localhost",user="root",password="aA1zZ26")
+mydb = mysql.connect(host='localhost', user='root', password='Unique@32')
 mycursor = mydb.cursor()
 mycursor.execute("USE nptel")
 
