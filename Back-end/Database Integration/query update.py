@@ -31,77 +31,79 @@ def print_count_of_rows():
         count = count[0][0]
         print(f"{table}:", count)
 
-print_count_of_rows()
-# DROP TABLE course_bucket5
-
-'''
-CREATE VIEW course_bucket4 AS (
-    (SELECT Course_number as course_id, Course_Name as course_name, Course_Description as course_description, University as university, 
-     Course_URL as course_url, Price as price, 'coursera' AS course_vendor FROM coursera_courses) 
-    Union 
-    (SELECT (3440 + id) as course_id, Course_Name as course_name, CONCAT('Prof: ', SME_Name, ', Duration: ', Duration, ", Applicable_NPTEL_Domain: ", IFNULL(Applicable_NPTEL_Domain, 'NA')) as course_description, Institute as university, NPTEL_URL as course_url, 
-     Price as price, 'nptel' AS course_vendor FROM nptel_courses)
-    Union 
-    (SELECT (3730 + id) as course_id, Title as course_name, CONCAT("Instructor: ", instructor, ", course duration: ", course_duration) as course_description, "NA" as university, URL as course_url, 
-     price, 'skillshare' as course_vendor FROM skillshare_courses) 
-    Union 
-    (SELECT (3828 + number) as course_id, Name as course_name, About as course_description, School as university, Link as course_url, 
-     Price as price, 'udacity' AS course_vendor FROM udacity_courses) 
-    Union 
-    (SELECT (3883 + course_id) as course_id, course_title as course_name, CONCAT("Subject: ", subject, ", Number of lecture: ", num_lectures, ", content duration in hours: ", content_duration, ", Course Level: ", level) as course_description, 
-     "NA" as university, url as course_url, price, 'udemy' AS course_vendor FROM udemy_courses) 
-    );
-'''
-
-# Create a table called course_bucket5 that stores the content of the view course_bucket4
-# mycursor.execute("CREATE TABLE course_bucket5 AS SELECT * FROM course_bucket4")
-# Drop the table course_bucket5
-# mycursor.execute("DROP TABLE course_bucket5")
-
-# table names-
-# coursera_courses
-# skillshare_courses
-# udacity_courses
-# udemy_courses
-# nptel_courses
-### course_bucket
-
-# show ddl of a table
-# mycursor.execute("SHOW CREATE TABLE course_bucket")
-
+# print_count_of_rows()
 
 def find_mapping(table_name, columns, global_columns):
-    # course_bucket:      ['course_id', 'course_name', 'course_description', 'university', 'course_url', 'course_vendor', 'price']
-    # skillshare_courses: ['id', 'Title', 'URL', 'students_count', 'course_duration', 'instructor', 'lessions_count', 'level', 'student_projects', 'engaging', 'clarity', 'quality', 'price']
+    # course_bucket:      ['id', 'local_course_id', 'course_name', 'course_description', 'university', 'course_url', 'course_vendor', 'price']
 
-    # Find coloumns that match based on some similarity in both the tables
-    # For example, course_id and id are similar
     # Ontology based matching
     if table_name == 'skillshare_courses':
         mapping = {
-            'course_id': 'id',
+            'local_course_id': 'id',
             'course_name': 'Title',
-            'course_description': 'course_duration'+', '+ 'instructor',
-            'university': 'NA',
+            'course_description': """CONCAT(Instructor: , instructor, course duration: , course_duration)""",
+            'university': '"NA"',
             'course_url': 'URL',
-            'course_vendor': 'skillshare',
-            'price': 'price'
+            'price': 'price',
+            'course_vendor': '"skillshare"'
         }
-        new_query = 'INSERT INTO course_bucket (course_id, course_name, course_description, university, course_url, course_vendor, price) VALUES '
-        new_query += '('
+    elif table_name == 'udacity_courses':
+        mapping = {
+            'local_course_id': 'number',
+            'course_name': 'Name',
+            'course_description': 'About',
+            'university': 'School',
+            'course_url': 'Link',
+            'price': 'Price',
+            'course_vendor': '"udacity"'
+        }
+    elif table_name == 'udemy_courses':
+        mapping = {
+            'local_course_id': 'course_id',
+            'course_name': 'course_title',
+            'course_description': """CONCAT(Subject: , subject, Number of lecture: , num_lectures, content duration in hours: , content_duration, Course Level: , level)""",
+            'university': '"NA"',
+            'course_url': 'url',
+            'price': 'price',
+            'course_vendor': '"udemy"'
+        }
+    elif table_name == 'nptel_courses':
+        mapping = {
+            'local_course_id': 'id',
+            'course_name': 'Course_Name',
+            'course_description': """CONCAT(Prof: , SME_Name, Duration: , Duration, Applicable_NPTEL_Domain: , IFNULL(Applicable_NPTEL_Domain, 'NA'))""",
+            'university': 'Institute',
+            'course_url': 'NPTEL_URL',
+            'price': 'Price',
+            'course_vendor': '"nptel"'
+        }
+    elif table_name == 'coursera_courses':
+        mapping = {
+            'local_course_id': 'Course_number',
+            'course_name': 'Course_Name',
+            'course_description': 'Course_Description',
+            'university': 'University',
+            'course_url': 'Course_URL',
+            'price': 'Price',
+            'course_vendor': '"coursera"'
+        }
+    else:
+        mapping = {}
     
-    # NLP based matching
+    return mapping
     
-'''
-(SELECT id as course_id, Title as course_name,
- ("Instructor:"+instructor+ " , course duration:"+'course duration') as course_description, 
- "NA" as university, URL as course_url, 
-    price, 'skillshare' as course_vendor FROM skillshare_courses)
-'''
-
 
 
 def update_table(actual_query, table_columns):
+    # Execute actual_query
+    actual_query = actual_query.lower()
+    print('-------------------------------------------------------------------------')
+    print(actual_query)
+    print('-------------------------------------------------------------------------')
+    # mycursor.execute(actual_query)
+    # mydb.commit()
+    # print("Actual query executed successfully!")
+
     # Check if its an insert, delete or update query
     query = actual_query.split(' ')
     table_name = query[2]
@@ -112,18 +114,131 @@ def update_table(actual_query, table_columns):
     elif query[0].lower() == 'update':
         table_name = query[1]
     
-    # find_schema_mapping between this table and the global table course_bucket
 
-    # find the columns of this table
     columns = table_columns[table_name]
-    print(columns)
-    # find the columns of the global table
-    global_columns = table_columns['course_bucket']
-    print(global_columns)
+    # print(f'{table_name}:', columns)
+    global_table_name = 'course_bucket'
+    global_columns = table_columns[global_table_name]
+    # print(f'{global_table_name}:', global_columns)
 
     # find the mapping between the columns of this table and the global table
-    mapping = find_mapping(table_name, columns, global_columns)
+    mapped_dic = find_mapping(table_name, columns, global_columns)
 
+    # Create the mapped query
+    mapped_query = ''
+    if query[0].lower() == 'insert':
+        # Insert the record in the db table
+        mapped_query += 'INSERT INTO '+global_table_name+' (local_course_id, course_name, course_description, university, course_url, price, course_vendor) VALUES ( '
+        values = actual_query.split(' values ')[1].split('(')[1].split(')')[0].split(', ')
+        # Explicitly check whether the course_description is also split into multiple columns or not
+        
+        print(values)
+        value_mapping = {}
+        for i in range(len(values)):
+            value_mapping[columns[i]] = values[i]
+        print(value_mapping)
+
+        mapped_query += value_mapping[mapped_dic['local_course_id']]+', '+value_mapping[mapped_dic['course_name']]+', '
+        # mapped_query += value_mapping[mapped_dic['course_description']]
+
+        course_descr = mapped_dic['course_description']
+        # Check if the course_descr is a string or a function by looking for the word CONCAT
+        if 'CONCAT' in course_descr:
+            course_descr_temp = course_descr[7:-1]
+            course_descr_temp = course_descr_temp.split(', ')
+            # check if IFNULL is there in the second last term
+            if 'IFNULL' in course_descr_temp[-2]:
+                course_descr_temp[-2] = course_descr_temp[-2][7:]
+                course_descr_temp = course_descr_temp[:-1]
+
+            for i in range(len(course_descr_temp)):
+                if i%2 == 1:
+                    # check if it exists in the value_mapping
+                    if course_descr_temp[i] in value_mapping:
+                        course_descr_temp[i] = value_mapping[course_descr_temp[i]][1:-1]+','
+                    else:
+                        course_descr_temp[i] = "'NA'"+','
+
+            course_descr_temp[-1] = course_descr_temp[-1][:-1]
+            course_descr_temp = ' '.join(course_descr_temp)
+            course_descr_temp = "'"+course_descr_temp+"'"
+            mapped_query += course_descr_temp+', '
+        else:
+            # This is a string
+            mapped_query += value_mapping[course_descr]+', '
+        
+        if mapped_dic['university'] == '"NA"':
+            mapped_query += mapped_dic['university']+', '
+        else:
+            mapped_query += value_mapping[mapped_dic['university']]+', '
+        
+        mapped_query += value_mapping[mapped_dic['course_url']]+', '+value_mapping[mapped_dic['price']]+', '
+        mapped_query += mapped_dic['course_vendor']
+        mapped_query += ');'
+    
+
+    elif query[0].lower() == 'delete':
+        # Delete the record from the db table
+        mapped_query += 'DELETE FROM '+global_table_name+' WHERE '
+        if 'where' in query:
+            where_clause = actual_query.split('where ')[1].split(' and ')
+            where_clause[-1] = where_clause[-1][:-1]
+            for i in range(len(where_clause)):
+                if '=' in where_clause[i]:
+                    key, value = where_clause[i].split('=')
+                    cmp_operator = '='
+                elif 'like' in where_clause[i]:
+                    key, value = where_clause[i].split('like')
+                    cmp_operator = 'like'
+                elif '>' in where_clause[i]:
+                    key, value = where_clause[i].split('>')
+                    cmp_operator = '>'
+                elif '<' in where_clause[i]:
+                    key, value = where_clause[i].split('<')
+                    cmp_operator = '<'
+                else:
+                    key, value = where_clause[i].split('in')
+                    cmp_operator = 'in'
+
+                key = key.strip()
+                value = value.strip()
+                print(key, value)
+                # search mapped_dic.values() for the key
+                for k, v in mapped_dic.items():
+                    if v == key:
+                        key = k
+                        break
+                # find the value in the value_mapping
+                # if value in value_mapping:
+                #     value = value_mapping[value]
+                # else:
+                #     value = "'"+value+"'"
+                where_clause[i] = key+' '+cmp_operator+' '+value
+            where_clause = ' and '.join(where_clause)
+                
+            print(where_clause)
+        mapped_query += where_clause+' and course_vendor = "'+table_name.split('_')[0]+'";'
+
+
+    elif query[0].lower() == 'update':
+        # Update the record in the db table
+        mapped_query += 'UPDATE '+global_table_name+' SET '
+    print('-------------------------------------------------------------------------')
+    print(mapped_query)
+    print('-------------------------------------------------------------------------')
+    mycursor.execute(mapped_query)
+    mydb.commit()
+    print("Mapped query executed successfully!")
+
+
+# Query for deleting a record from the course_bucket table.
+# query = '''DELETE FROM course_bucket WHERE course_id = 29999;'''
+
+# Query for inserting a record into the course_bucket table.
+# query = '''INSERT INTO course_bucket (course_id, course_name, course_description, university, course_url, price, course_vendor) VALUES (29999, 'Learn How to Create a WordPress Website', 'Instructor: Darrel Wilson, course duration: 2.5 hours', 'NA', 'https://www.skillshare.com/classes/Learn-How-to-Create-a-WordPress-Website/2126456149?via=browse-rating-wordpress-layout-grid', 80000, 'skillshare');'''
+
+# Query for updating a record in the course_bucket table.
+# query = '''UPDATE course_bucket SET price = 89000 WHERE course_id = 29999;'''
 
 def main_menu():
     # Create a main menu with insert, delete, update and exit options. 
@@ -160,8 +275,15 @@ def main_menu():
         choice = int(input("Enter your choice: "))
 
 # main_menu()
-query = '''INSERT INTO skillshare_courses (id, Title, URL, students_count, course_duration, instructor, lessions_count, level, student_projects, engaging, clarity, quality, price) VALUES (29999, 'Learn How to Create a WordPress Website', 'https://www.skillshare.com/classes/Learn-How-to-Create-a-WordPress-Website/2126456149?via=browse-rating-wordpress-layout-grid', 0, '2.5 hours', 'Darrel Wilson', 21, 'Beginner', '1', '4.5', '4.5', '4.5', 80000);'''
-update_table(query, table_columns)
+# query = '''INSERT INTO skillshare_courses (id, Title, URL, students_count, course_duration, instructor, lessions_count, level, student_projects, engaging, clarity, quality, price) VALUES (29999, 'Learn How to Create a WordPress Website', 'https://www.skillshare.com/classes/Learn-How-to-Create-a-WordPress-Website/2126456149?via=browse-rating-wordpress-layout-grid', 0, '2.5 hours', 'Darrel Wilson', 21, 'Beginner', '1', '4.5', '4.5', '4.5', 80000);'''
+# query for inserting into coursera table
+# query = '''INSERT INTO coursera_courses (Course_number, Course_Name, University, Difficulty_Level, Course_Rating, Course_URL, Course_Description, Skills, Price) VALUES (29999, 'Learn How to Create a WordPress Website', 'NA', 'Beginner', '4.5', 'https://www.skillshare.com/classes/Learn-How-to-Create-a-WordPress-Website/2126456149?via=browse-rating-wordpress-layout-grid', 'Instructor: Darrel Wilson course duration: 2.5 hours', 'NA', 80000);'''
+# query for deleting from skillshare table
+# query = '''DELETE FROM skillshare_courses WHERE id = 29999;'''
+# update_table(query, table_columns)
+# mycursor.execute('''SELECT * FROM course_bucket WHERE local_course_id = 29999 and course_vendor = 'skillshare';''')
+# print(mycursor.fetchall())
+
 
 # Write an insert query for inserting into skillshare_courses
 # query_insert = '''INSERT INTO skillshare_courses (id, Title, URL, students_count, course_duration, instructor, lessions_count, level, student_projects, engaging, clarity, quality, price) VALUES (29999, 'Learn How to Create a WordPress Website', 'https://www.skillshare.com/classes/Learn-How-to-Create-a-WordPress-Website/2126456149?via=browse-rating-wordpress-layout-grid', 0, '2.5 hours', 'Darrel Wilson', 21, 'Beginner', '1', '4.5', '4.5', '4.5', 80000);'''
@@ -169,7 +291,7 @@ update_table(query, table_columns)
 # query_delete = '''DELETE FROM skillshare_courses WHERE id = 29999;'''
 '''
 ['course_bucket', 'coursera_courses', 'nptel_courses', 'skillshare_courses', 'udacity_courses', 'udemy_courses']
-course_bucket:      ['course_id', 'course_name', 'course_description', 'university', 'course_url', 'course_vendor', 'price']
+course_bucket:      ['id', 'local_course_id', 'course_name', 'course_description', 'university', 'course_url', 'course_vendor', 'price']
 
 coursera_courses:   ['Course_number', 'Course_Name', 'University', 'Difficulty_Level', 'Course_Rating', 'Course_URL', 'Course_Description', 'Skills', 'Price']
 nptel_courses:      ['id', 'Discipline', 'Course_Name', 'SME_Name', 'Institute', 'Co-ordinating_Institute', 'Duration', 'Type_of_course', 'Start_date', 'End_date', 'Exam_date', 'Enrollment_End_date', 'Exam_Registration_End_date', 'UG/PG', 'Core/Elective', 'FDP', 'Applicable_NPTEL_Domain', 'Click_here_to_join_the_course', 'Old_course_URL', 'NPTEL_URL', 'Price']
