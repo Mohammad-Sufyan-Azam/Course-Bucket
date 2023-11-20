@@ -23,13 +23,16 @@ for table in tables:
 
 # print(table_columns)
 
-# Get the total number of columns in each table
-for table in tables:
-    mycursor.execute("SELECT COUNT(*) FROM "+table)
-    count = mycursor.fetchall()
-    count = count[0][0]
-    print(f"{table}:", count)
-    
+def print_count_of_rows():
+    # Get the total number of columns in each table
+    for table in tables:
+        mycursor.execute("SELECT COUNT(*) FROM "+table)
+        count = mycursor.fetchall()
+        count = count[0][0]
+        print(f"{table}:", count)
+
+print_count_of_rows()
+# DROP TABLE course_bucket5
 
 '''
 CREATE VIEW course_bucket4 AS (
@@ -63,6 +66,9 @@ CREATE VIEW course_bucket4 AS (
 # nptel_courses
 ### course_bucket
 
+# show ddl of a table
+# mycursor.execute("SHOW CREATE TABLE course_bucket")
+
 
 def find_mapping(table_name, columns, global_columns):
     # course_bucket:      ['course_id', 'course_name', 'course_description', 'university', 'course_url', 'course_vendor', 'price']
@@ -91,15 +97,13 @@ def find_mapping(table_name, columns, global_columns):
  ("Instructor:"+instructor+ " , course duration:"+'course duration') as course_description, 
  "NA" as university, URL as course_url, 
     price, 'skillshare' as course_vendor FROM skillshare_courses)
-    
-
 '''
 
 
 
-def update_table(query, table_columns):
+def update_table(actual_query, table_columns):
     # Check if its an insert, delete or update query
-    query = query.split(' ')
+    query = actual_query.split(' ')
     table_name = query[2]
     if query[0].lower() == 'insert':
         table_name = query[2]
@@ -157,7 +161,7 @@ def main_menu():
 
 # main_menu()
 query = '''INSERT INTO skillshare_courses (id, Title, URL, students_count, course_duration, instructor, lessions_count, level, student_projects, engaging, clarity, quality, price) VALUES (29999, 'Learn How to Create a WordPress Website', 'https://www.skillshare.com/classes/Learn-How-to-Create-a-WordPress-Website/2126456149?via=browse-rating-wordpress-layout-grid', 0, '2.5 hours', 'Darrel Wilson', 21, 'Beginner', '1', '4.5', '4.5', '4.5', 80000);'''
-# update_table(query, table_columns)
+update_table(query, table_columns)
 
 # Write an insert query for inserting into skillshare_courses
 # query_insert = '''INSERT INTO skillshare_courses (id, Title, URL, students_count, course_duration, instructor, lessions_count, level, student_projects, engaging, clarity, quality, price) VALUES (29999, 'Learn How to Create a WordPress Website', 'https://www.skillshare.com/classes/Learn-How-to-Create-a-WordPress-Website/2126456149?via=browse-rating-wordpress-layout-grid', 0, '2.5 hours', 'Darrel Wilson', 21, 'Beginner', '1', '4.5', '4.5', '4.5', 80000);'''
@@ -173,23 +177,3 @@ skillshare_courses: ['id', 'Title', 'URL', 'students_count', 'course_duration', 
 udacity_courses:    ['number', 'Name', 'School', 'Difficulty_Level', 'Rating', 'Link', 'About', 'Price']
 udemy_courses:      ['course_id', 'course_title', 'url', 'is_paid', 'price', 'num_subscribers', 'num_reviews', 'num_lectures', 'level', 'content_duration', 'published_timestamp', 'subject']
 '''
-
-
-# Writing a query for creating a global view of all the courses excluding the course_bucket table
-
-# CREATE VIEW course_bucket4 AS ( 
-#     (SELECT 'Course_number' as course_id, Course_Name as course_name, 'Course_Description' as course_description, University as university, Course_URL as course_url, 
-#       Price as price, 'coursera' AS course_vendor FROM coursera_courses)
-#     Union
-#     (SELECT (1019 + id) as course_id, "Course Name" as course_name, ("Prof:"+'SME Name'+"Duration:"+Duration) as course_description, Institute as university, 
-#       NPTEL_URL as course_url, Price as price, 'nptel' AS course_vendor FROM nptel_courses)
-#     Union
-#     (SELECT (1309 + id) as course_id, Title as course_name, ("Instructor:"+instructor+ " , course duration:"+'course duration') as course_description, "NA" as university, 
-#       URL as course_url, price, 'skillshare' as course_vendor FROM skillshare_courses)
-#     Union
-#     (SELECT (1509 + number) as course_id, Name as course_name, About as course_description, School as university, Link as course_url, Price as price, 
-#       'udacity' as course_vendor FROM udacity_courses)
-#     Union
-#     (SELECT (1709 + course_id) as course_id, course_title as course_name, content_duration as course_description, subject as university, url as course_url, price, 
-#       'udemy' as course_vendor FROM udemy_courses)
-# );
