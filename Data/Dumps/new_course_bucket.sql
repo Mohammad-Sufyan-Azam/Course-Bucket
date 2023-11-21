@@ -18,9 +18,10 @@ CREATE VIEW course_bucket4 AS (
     );
 SELECT * FROM course_bucket4;
 
+
 CREATE TABLE course_bucket (
     id INT AUTO_INCREMENT,
-	local_course_id int NOT NULL DEFAULT '0',
+	local_course_id varchar(200) NOT NULL,
 	course_name varchar(200) DEFAULT NULL,
 	course_description text,
 	university varchar(200) DEFAULT NULL,
@@ -29,9 +30,14 @@ CREATE TABLE course_bucket (
 	course_vendor varchar(10) NOT NULL DEFAULT '',
     PRIMARY KEY (id)
 );
+
 INSERT INTO course_bucket (local_course_id, course_name, course_description, university, course_url, price, course_vendor)
 SELECT local_course_id, course_name, course_description, university, course_url, price, course_vendor FROM course_bucket4;
 SELECT * FROM course_bucket;
+
+DELETE FROM course_bucket;
+
+-- DROP TABLE course_bucket;
 
 -- course_bucket: 4132
 -- coursera_courses: 3440
@@ -39,3 +45,16 @@ SELECT * FROM course_bucket;
 -- skillshare_courses: 98
 -- udacity_courses: 55
 -- udemy_courses: 249
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -91,18 +91,25 @@ def find_mapping(table_name, columns, global_columns):
         mapping = {}
     
     return mapping
-    
+
+'''
+oursera_courses: ['Course_number', 'Course_Name', 'University', 'Difficulty_Level', 'Course_Rating', 'Course_URL', 'Course_Description', 'Skills', 'Price']
+course_bucket: ['id', 'local_course_id', 'course_name', 'course_description', 'university', 'course_url', 'price', 'course_vendor']
+
+DELETE FROM coursera_courses WHERE University = 'NA' and Course_number = 29999;
+'''
 
 
-def update_table(actual_query, table_columns):
+def update_table(actual_query, table_columns, execution=False):
     # Execute actual_query
     actual_query = actual_query.lower()
     print('-------------------------------------------------------------------------')
     print(actual_query)
     print('-------------------------------------------------------------------------')
-    # mycursor.execute(actual_query)
-    # mydb.commit()
-    # print("Actual query executed successfully!")
+    if execution:
+        mycursor.execute(actual_query)
+        mydb.commit()
+        print("Actual query executed successfully!")
 
     # Check if its an insert, delete or update query
     query = actual_query.split(' ')
@@ -226,9 +233,10 @@ def update_table(actual_query, table_columns):
     print('-------------------------------------------------------------------------')
     print(mapped_query)
     print('-------------------------------------------------------------------------')
-    mycursor.execute(mapped_query)
-    mydb.commit()
-    print("Mapped query executed successfully!")
+    if execution:
+        mycursor.execute(mapped_query)
+        mydb.commit()
+        print("Mapped query executed successfully!")
 
 
 # Query for deleting a record from the course_bucket table.
@@ -274,8 +282,14 @@ def main_menu():
         print("4. Exit")
         choice = int(input("Enter your choice: "))
 
-# main_menu()
-# query = '''INSERT INTO skillshare_courses (id, Title, URL, students_count, course_duration, instructor, lessions_count, level, student_projects, engaging, clarity, quality, price) VALUES (29999, 'Learn How to Create a WordPress Website', 'https://www.skillshare.com/classes/Learn-How-to-Create-a-WordPress-Website/2126456149?via=browse-rating-wordpress-layout-grid', 0, '2.5 hours', 'Darrel Wilson', 21, 'Beginner', '1', '4.5', '4.5', '4.5', 80000);'''
+query = '''
+INSERT INTO skillshare_courses 
+(id, Title, URL, students_count, course_duration, instructor, lessions_count, level, student_projects, engaging, clarity, quality, price) 
+VALUES 
+(29999, 'Learn How to Create a WordPress Website', 'https://www.skillshare.com/classes/Learn-How-to-Create-a-WordPress-Website/2126456149?via=browse-rating-wordpress-layout-grid', 
+0, '2.5 hours', 'Darrel Wilson', 21, 'Beginner', '1', '4.5', '4.5', '4.5', 80000);
+'''
+main_menu()
 # query for inserting into coursera table
 # query = '''INSERT INTO coursera_courses (Course_number, Course_Name, University, Difficulty_Level, Course_Rating, Course_URL, Course_Description, Skills, Price) VALUES (29999, 'Learn How to Create a WordPress Website', 'NA', 'Beginner', '4.5', 'https://www.skillshare.com/classes/Learn-How-to-Create-a-WordPress-Website/2126456149?via=browse-rating-wordpress-layout-grid', 'Instructor: Darrel Wilson course duration: 2.5 hours', 'NA', 80000);'''
 # query for deleting from skillshare table
