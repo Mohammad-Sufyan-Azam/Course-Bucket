@@ -16,6 +16,7 @@ app = Flask(__name__, template_folder='', static_folder='')
 def index():
     return render_template('index.html')
 
+
 @app.route('/search')
 def search():
     return render_template('search.html')
@@ -28,7 +29,7 @@ def search_query_input():
     university = request.form['institute'].strip().lower()
     platform = request.form['platform'].strip().lower()
 
-    # db.executeQuery(course_name, price, university, platform)
+    db.executeQuery(course_name, price, university, platform)
 
     print("Course name: ", course_name)
     print("Price: ", price)
@@ -36,9 +37,8 @@ def search_query_input():
     print("Platform: ", platform)
     print("-----------------------------------")
 
-    # create a query to 
-
     return render_template("search.html")
+
 
 @app.route('/get_data', methods=['GET', 'POST'])
 def get_data():

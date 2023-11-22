@@ -1,21 +1,52 @@
 from distutils.util import execute
-# import execute from setuptools.command.install 
-# from setuptools.command.install import execute
 from importlib_metadata import Prepared
-import mysql.connector
+import mysql.connector as mysql
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import string
+import re
+import nltk
+from nltk.corpus import stopwords
+import random
 
-mydb = mysql.connector.connect(
+
+mydb = mysql.connect(
     host = "localhost",
     username = "root",
     passwd = "Unique@32",
     database = "nptel"
 )
 
-my_cursor = mydb.cursor(prepared = True)
+# course_bucket: ['id', 'local_course_id', 'course_name', 'course_description', 'university', 'course_url', 'course_vendor', 'price']
+
+
+# function to preprocess the query
+def preprocess_text(text):
+    text = text.lower()
+    text = re.sub(r'\W', ' ', text)
+    text = re.sub(r'\s+[a-zA-Z]\s+', ' ', text)
+    text = re.sub(r'\^[a-zA-Z]\s+', ' ', text)
+    text = re.sub(r'\s+', ' ', text, flags=re.I)
+    text = "".join([char for char in text if char not in string.punctuation])
+    stop_words = set(stopwords.words('english'))
+    text = " ".join([word for word in text.split() if word not in stop_words])
+    return text
+
+#function to rank the courses based on the similarity between the query and the course name
+def compute_similarity(query, string, weight=0.5):
+    
+    vectorizer = TfidfVectorizer().fit_transform([string, query])
+    vector_similarity = vectorizer * vectorizer.T
+    cosine_sim = cosine_similarity(vectorizer)
+    combined_similarity = weight * vector_similarity.toarray()[0][1] + (1 - weight) * cosine_sim[0][1]
+    return combined_similarity
+
+
+mycursor = mydb.cursor(prepared = True)
 
 def showTables():
-    my_cursor.execute("show tables")
-    result = my_cursor.fetchall()
+    mycursor.execute("show tables")
+    result = mycursor.fetchall()
     return result
     
 # print(showTables())
@@ -23,16 +54,18 @@ def showTables():
 
 
 def handleCourseName(course, myresult):
+    # course_bucket: ['id', 'local_course_id', 'course_name', 'course_description', 'university', 'course_url', 'course_vendor', 'price']
+
     course = preprocess_text(course)
-    mycursor.execute("SELECT * FROM course_bucket4")
-    myresult = mycursor.fetchall()
-    result=[]
+    result = []
     for x in myresult:
-        if compute_similarity(query,(x[1]))>0:
-            result.append([x[1],x[4],x[5],x[6]])
-    result.sort(key=lambda x: compute_similarity(query,(x[0])), reverse=True)
-    print("The results sorted by relevance are: ")   
-    print("s.no.\tCourse\tvendor\turl\tprice")     
+        if compute_similarity(course, (x[2])) > 0:
+            result.append([x[2], x[5], x[6], x[7]])
+    
+    result.sort(key=lambda x: compute_similarity(course, (x[0])), reverse=True)
+
+    print("The results sorted by relevance are: ")
+    print("s.no.\tCourse\tvendor\turl\tprice")
     for i in range(len(result)):
         print(i+1,".\t",result[i][0],"\t",result[i][2],"\t",result[i][1],"\t",result[i][3],sep="")
     print()
@@ -50,29 +83,24 @@ def executeQuery(course_name, price, university, platform):
         platform = platform.split(',')
         # iterate and strip each element
         for i in range(len(platform)):
-            platform[i] = platform[i].strip()    
-            sql += f"course_vendor = '{platform}' or "
+            print(platform[i])
+            platform[i] = platform[i].strip()
+            sql += f"course_vendor = '{platform[i]}' or "
         
     
     if university != '' and university != 'na' and university != 'null':
         sql += f"university = '{university}' and "
     
     sql = sql[:-4]+';'
-    my_cursor.execute(sql)
-    all_result = my_cursor.fetchall()
-    print(all_result)
+    mycursor.execute(sql)
+    all_result = mycursor.fetchall()
+    # print(all_result)
+    print(sql)
     
     if course_name == '' or course_name == 'na' or course_name == 'null':
         return all_result
     
-    handleCourseName(course_name, all_result)
+    query_result = handleCourseName(course_name, all_result)
+    return query_result
 
-
-# course_bucket: ['id', 'local_course_id', 'course_name', 'course_description', 'university', 'course_url', 'price', 'course_vendor']
-# my_cursor.execute("select * from course_bucket WHERE course_name LIKE '%machine%';")
-# result = my_cursor.fetchall()
-# for i in result:
-#     print(i)
-
-# renaming coursera_courses able to course_bucket
-mydb.commit()
+# executeQuery('python', 'Paid', 'na', 'udemy, udacity, nptel, skillshare')
