@@ -5,6 +5,7 @@ import os
 import json
 import requests
 import pandas as pd
+import json
 import numpy as np
 
 import mydata as db
@@ -26,18 +27,18 @@ def search():
 def search_query_input():
     course_name = request.form['course'].strip().lower()
     price = request.form['price']
-    university = request.form['institute'].strip().lower()
+    university = request.form['institute'].strip()
     platform = request.form['platform'].strip().lower()
 
-    db.executeQuery(course_name, price, university, platform)
-
+    results=db.executeQuery(course_name, price, university, platform)
+    json_results = json.dumps(results)
     print("Course name: ", course_name)
     print("Price: ", price)
     print("University: ", university)
     print("Platform: ", platform)
     print("-----------------------------------")
 
-    return render_template("search.html")
+    return render_template("search.html", results=json_results)
 
 
 @app.route('/get_data', methods=['GET', 'POST'])

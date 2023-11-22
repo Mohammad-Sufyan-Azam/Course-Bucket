@@ -13,7 +13,7 @@ import random
 mydb = mysql.connect(
     host = "localhost",
     username = "root",
-    passwd = "Unique@32",
+    passwd = "aA1zZ26",
     database = "nptel"
 )
 
@@ -60,7 +60,7 @@ def handleCourseName(course, myresult):
     result = []
     for x in myresult:
         if compute_similarity(course, (x[2])) > 0:
-            result.append([x[2], x[5], x[6], x[7]])
+            result.append([x[2],x[3].split(".")[0], x[5],x[4], x[6], x[7]])
     
     result.sort(key=lambda x: compute_similarity(course, (x[0])), reverse=True)
 
@@ -98,6 +98,8 @@ def executeQuery(course_name, price, university, platform):
     print(sql)
     
     if course_name == '' or course_name == 'na' or course_name == 'null':
+        for i in range(len(all_result)):
+            all_result[i] = (all_result[i][2], all_result[i][3].split(".")[0], all_result[i][5], all_result[i][4], all_result[i][6], all_result[i][7])
         return all_result
     
     query_result = handleCourseName(course_name, all_result)
