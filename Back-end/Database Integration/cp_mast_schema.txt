@@ -1,0 +1,6 @@
+local_course_id, VARCHAR(255)
+course_name, VARCHAR(255)
+course_description, TEXT
+university, VARCHAR(255)
+course_url, VARCHAR(255)
+price, FLOAT

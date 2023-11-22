@@ -1,21 +1,28 @@
-# import mysql.connector as mysql
+import mysql.connector as mysql
+import pickle
 
-# mydb = mysql.connect(host='localhost', user='root', password='Unique@32')
-# mycursor = mydb.cursor()
-# mycursor.execute("USE nptel")
+mydb = mysql.connect(host='localhost', user='root', password='Unique@32')
+mycursor = mydb.cursor()
+mycursor.execute("USE nptel")
 
-# # Global Schema
-# global_schema = ['id', 'local_course_id', 'course_name', 'course_description', 'university', 'course_url', 'price', 'course_vendor']
+# Global Schema
+global_schema = ['local_course_id', 'course_name', 'course_description', 'university', 'course_url', 'price', 'course_vendor']
 
-# # Dictionary containing words similar to the column names in the database for matching
-# column_name_similarity = {
-#     'id': ['id', 'course_id', 'courseid', 'course_id', 'courseid'],
-#     'local_course_id': ['local_cou']
-# }
+# Dictionary containing words similar to the column names in the database for matching
+column_name_similarity = {
+    'id': ['id', 'course_id', 'courseid', 'course_id', 'courseid'],
+    'local_course_id': ['local_course_id', 'localcourseid', 'local_courseid', 'localcourse_id'],
+    'course_name': ['course_name', 'coursename', 'course_name', 'coursename'],
+    'course_description': ['course_description', 'coursedescription', 'course_description', 'coursedescription'],
+    'university': ['university', 'university', 'university', 'university'],
+    'course_url': ['course_url', 'courseurl', 'course_url', 'courseurl'],
+    'price': ['price', 'price', 'price', 'price'],
+    'course_vendor': ['course_vendor', 'coursevendor', 'course_vendor', 'coursevendor']
+}
 
-# # MetaData contains the online course vendors and the mapping of their column names to the column names in the database
-# mapping_metadata = {}
-# global_vendors = []
+# MetaData contains the online course vendors and the mapping of their column names to the column names in the database
+mapping_metadata = {}
+global_vendors = []
 
 def find_similar_col(column_name, column_name_similarity):
     for key in column_name_similarity:
@@ -26,10 +33,11 @@ def find_similar_col(column_name, column_name_similarity):
 # Function to add a new vendor to the metadata
 def add_vendor_schema(vendor_name, vendor_schema):
     # Get the schema of the vendor from pickle file
-    with open('metadata_mapping.pickle', 'rb') as f:
+    with open('metadata_mapping.pkl', 'rb') as f:
         mapping_metadata = pickle.load(f)
     cols_present = []
     course_desc_cols = []
+    mapping_metadata[vendor_name] = {}
     for col_name in vendor_schema:
         # Finding the similarity of the column name with the column names in the database
         sim_global_col_name = find_similar_col(col_name, column_name_similarity)
@@ -40,13 +48,13 @@ def add_vendor_schema(vendor_name, vendor_schema):
             course_desc_cols.append(col_name)
 
     # Adding the left out columns to description in this format: CONCAT(Prof: , SME_Name, Duration: , Duration, Applicable_NPTEL_Domain: , IFNULL(Applicable_NPTEL_Domain, 'NA'))
-    if mapping_metadata[vendor_name]['course_description'] is None:
+    if mapping_metadata[vendor_name].get('course_description') is None:
         mapping_metadata[vendor_name]['course_description'] = "CONCAT(" + ", ".join(course_desc_cols) + ")"
     
     mapping_metadata[vendor_name]['course_vendor'] = '"'+vendor_name + '"'
 
     # Update the metadata in a pickle file
-    with open('metadata_mapping.pickle', 'wb') as f:
+    with open('metadata_mapping.pkl', 'wb') as f:
         pickle.dump(mapping_metadata, f, pickle.HIGHEST_PROTOCOL)
 
     return mapping_metadata[vendor_name]
@@ -73,8 +81,9 @@ def read_records(vendor_name):
         with open(csv_file, 'r') as f:
             col_names = f.readline()[:-1].split(',')
             for line in f:
-                # Remove \n from the end of the line
-                line = line[:-1]
+                # If \n is present at the end of the line, then remove it
+                if line[-1] == '\n':
+                    line = line[:-1]
                 record = {}
                 values = line.split(',')
                 for i in range(len(col_names)):
@@ -83,8 +92,8 @@ def read_records(vendor_name):
             # Closing the file
             f.close()
 
-        print("The records are: ")
-        print(records)
+        # print("The records are: ")
+        # print(records)
 
         return records, col_names
 
@@ -113,15 +122,18 @@ def generate_local_schema(vendor_name, col_names):
             f.close()
         return local_vendor_schema
 
-def add_local_source(vendor_name, records):
+def add_local_source(vendor_name):
     # Read records and schema from the csv file
-    records, col_name = read_records(vendor_name)
+    records, col_names = read_records(vendor_name)
 
     # Add this schema to the metadata
-    vendor_schema = add_vendor_schema(vendor_name, local_vendor_schema)
+    vendor_schema = add_vendor_schema(vendor_name, col_names)
 
     # Now writing a query to create a table for the vendor and add the records to the table
     local_schema = generate_local_schema(vendor_name, col_names)
+
+    # print('The local schema is: ')
+    # print(local_schema)
 
     # Now writing a query to create a table for the vendor and add the records to the table
     query = "CREATE TABLE " + vendor_name + " ("
@@ -129,17 +141,35 @@ def add_local_source(vendor_name, records):
         query += col_name + " " + local_schema[col_name] + ", "
     query = query[:-2]
     query += ")"
+    print('Query is: ')
+    print(query)
     mycursor.execute(query)
     mydb.commit()
+    print('Table created!')
+
+    records_tuple = []
+    for record in records:
+        record_tuple = []
+        for col_name in col_names:
+            record_tuple.append(record[col_name])
+        records_tuple.append(tuple(record_tuple))
+    
+    print('The records are: ')
+    print(records_tuple[0:5])
 
     # Now writing a query to add the records to local table created
     query = "INSERT INTO " + vendor_name + " (" + ", ".join(col_names) + ") VALUES ("
-    for col_name in col_names:
-        query += "%s, "
-    query = query[:-2]
-    query += ")"
-    mycursor.executemany(query, records)
-    mydb.commit()
+    for record in records_tuple:
+        for value in record:
+            query += value[1:-1] + ", "
+        query = query[:-2]
+        query += "), ("
+    query = query[:-3]
+    print('Query is: ')
+    print(query)
+
+    mycursor.execute(query)
+    mydb.commit()      
     
     # Local vendor is created now
 
@@ -154,7 +184,7 @@ def delete_local_source(vendor_name):
 
 def delete_vendor_schema(vendor_name):
     # Get the schema of the vendor from pickle file
-    with open('metadata_mapping.pickle', 'rb') as f:
+    with open('metadata_mapping.pkl', 'rb') as f:
         mapping_metadata = pickle.load(f)
 
     # Check if the vendor is present in the metadata
@@ -167,7 +197,7 @@ def delete_vendor_schema(vendor_name):
     del mapping_metadata[vendor_name]
 
     # Update the metadata in a pickle file
-    with open('metadata_mapping.pickle', 'wb') as f:
+    with open('metadata_mapping.pkl', 'wb') as f:
         pickle.dump(mapping_metadata, f, pickle.HIGHEST_PROTOCOL)
 
 def get_vendor_schema(vendor_name):
@@ -181,7 +211,7 @@ def get_global_schema():
 
 def __add_vendor_to_warehouse(vendor_name):
     # Get the schema of the vendor from pickle file
-    with open('metadata_mapping.pickle', 'rb') as f:
+    with open('metadata_mapping.pkl', 'rb') as f:
         mapping_metadata = pickle.load(f)
 
     # Get the schema of the vendor
@@ -250,7 +280,7 @@ def main_menu():
 
     global mapping_metadata
     # Read the metadata_mapping and store as a global variable
-    with open('metadata_mapping.pickle', 'rb') as f:
+    with open('metadata_mapping.pkl', 'rb') as f:
         mapping_metadata = pickle.load(f)
 
     if choice == 1:
@@ -279,6 +309,4 @@ def main_menu():
 
 
 if __name__ == '__main__':
-    read_records('vendor1')
-    # while True:
-    #     main_menu()
+    main_menu()
