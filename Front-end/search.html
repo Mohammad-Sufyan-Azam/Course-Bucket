@@ -24,27 +24,27 @@
         <h1 class="my-4">Course Search</h1>
 
         <!-- Search Form -->
-        <form class="mb-4">
+        <form method="post" action="/search_query" class="mb-4">
             <div class="form-group">
                 <label for="course">Course</label>
-                <input type="text" class="form-control" id="course" placeholder="Enter course name">
+                <input type="text" class="form-control" id="course" name="course" placeholder="Enter course name">
             </div>
             <div class="form-group">
                 <label for="price">Price</label>
-                <select class="form-control" id="price">
+                <select class="form-control" id="price" name="price">
                     <option>Free</option>
                     <option>Paid</option>
                 </select>
             </div>
             <div class="form-group">
                 <label for="institute">Institute</label>
-                <input type="text" class="form-control" id="institute" placeholder="Enter institute name">
+                <input type="text" class="form-control" id="institute" name="institute" placeholder="Enter institute name">
             </div>
             <div class="form-group">
                 <label for="platform">Platform</label>
-                <input type="text" class="form-control" id="platform" placeholder="Enter platform name">
+                <input type="text" class="form-control" id="platform" name="platform" placeholder="Enter platform name">
             </div>
-            <button type="submit" class="btn btn-primary">Search</button>
+            <a href="">  <button type="submit" class="btn btn-primary">Search</button>  </a>
         </form>
 
         <!-- Search Results -->
