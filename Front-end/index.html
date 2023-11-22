@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Sharp Sizzling Kookabura</title>
+   
+    <title>Course Bucket</title>
     <meta property="og:title" content="Sharp Sizzling Kookabura" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta charset="utf-8" />
@@ -26,6 +27,11 @@
         color: var(--dl-color-gray-black);
         background-color: var(--dl-color-gray-white);
 
+      }
+    </style>
+    <style>
+      button:hover {
+        cursor: pointer;
       }
     </style>
     <link
@@ -55,8 +61,14 @@
         }
       }
     </style>
+    <style>
+      button:hover {
+        cursor: pointer;
+      }
+    </style>
   </head>
   <body>
+    
     <link rel="stylesheet" href="./style.css" />
     <div>
       <link href="./index.css" rel="stylesheet" />
@@ -67,10 +79,10 @@
             <span class="home-logo">Course bucket</span>
             <div data-thq="thq-navbar-nav" class="home-desktop-menu">
               <nav class="home-links">
-                <span>About</span>
-                <span class="home-nav2">Features</span>
-                <span class="home-nav4">Team</span>
-                <span class="home-nav5">Blog</span>
+                <button>About</button>
+                <button class="home-nav2">Features</button>
+                <button class="home-nav4" onclick='window.open("team.html","_self","","")'>Team</button>
+                <button class="home-nav5">Blog</button>
               </nav>
               <div class="home-buttons">
                 <div class="home-container1">
@@ -98,12 +110,17 @@
                     </svg>
                   </div>
                 </div>
+                <style>
+                  button:hover {
+                    cursor: pointer;
+                  }
+                </style>
                 <nav class="home-links1">
-                  <span class="home-nav11">About</span>
-                  <span class="home-nav21">Features</span>
-                  <span class="home-nav3">Pricing</span>
-                  <span class="home-nav41">Team</span>
-                  <span class="home-nav51">Blog</span>
+                  <button class="home-nav11">About</button>
+                  <button class="home-nav21">Features</button>
+                  <button class="home-nav3">Pricing</button>
+                  <button class="home-nav41">Team</button>
+                  <button class="home-nav51">Blog</button>
                 </nav>
                 <div class="home-buttons1">
                   <button class="home-login1 button">Login</button>
@@ -127,7 +144,12 @@
               </div>
             </div>
           </header>
-        </div>
+        </div>  
+        <style>
+          button:hover {
+            cursor: pointer;
+          }
+        </style>
         <div class="home-hero">
           <div class="home-hero1">
             <div class="home-container2">
@@ -382,16 +404,18 @@
             <button class="home-banner-button button">Learn More</button>
           </div>
         </div>
+       
         <div class="home-faq"></div>
+        
         <div class="home-footer">
           <footer class="home-footer1">
             <div class="home-container7">
               <span class="home-logo2">Course Bucket</span>
               <nav class="home-nav1">
-                <span class="home-nav12">About</span>
-                <span class="home-nav22">Features</span>
-                <span class="home-nav42">Team</span>
-                <span class="home-nav52">Blog</span>
+                <button class="home-nav12" a href="home-details">About</button>
+                <button class="home-nav22">Features</button>
+                <button class="home-nav42" onclick='window.open("team.html","_self","","")'>Team</button>
+                <button class="home-nav52">Blog</button>
               </nav>
             </div>
             <div class="home-separator"></div>
