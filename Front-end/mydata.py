@@ -8,7 +8,6 @@ import re
 import nltk
 from nltk.corpus import stopwords
 import random
-import pickle
 
 
 mydb = mysql.connect(
@@ -65,16 +64,11 @@ def handleCourseName(course, myresult):
     
     result.sort(key=lambda x: compute_similarity(course, (x[0])), reverse=True)
 
-    # print("The results sorted by relevance are: ")
-    # print("s.no.\tCourse\tvendor\turl\tprice")
-    # for i in range(len(result)):
-    #     print(i+1,".\t",result[i][0],"\t",result[i][2],"\t",result[i][1],"\t",result[i][3],sep="")
-    # print()
-    # dump results in pkl file
-    with open('data.pkl', 'wb') as f:
-        pickle.dump(result, f)
-    
-    print('Done')
+    print("The results sorted by relevance are: ")
+    print("s.no.\tCourse\tvendor\turl\tprice")
+    for i in range(len(result)):
+        print(i+1,".\t",result[i][0],"\t",result[i][2],"\t",result[i][1],"\t",result[i][3],sep="")
+    print()
 
     return result
 
