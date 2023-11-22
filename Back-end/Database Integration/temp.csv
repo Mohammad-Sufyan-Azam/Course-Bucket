@@ -1,0 +1,11 @@
+id,local_course_id,course_name,price
+1,LC001,Mathematics,100
+2,LC002,Physics,150
+3,LC003,Chemistry,120
+4,LC004,Biology,130
+5,LC005,Computer Science,200
+6,LC006,English,80
+7,LC007,History,90
+8,LC008,Geography,110
+9,LC009,Economics,140
+10,LC010,Psychology,170
