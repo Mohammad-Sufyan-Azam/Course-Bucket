@@ -164,11 +164,15 @@
     </a>
 </div>
     <!-- Include Bootstrap JS -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script> -->
     <script type="text/javascript">
         // Parse the JSON string to a JavaScript array
         string = "{{results}}";
-        var newStr = string.replace(/&#34;/g, '\"');
+        var newStr = string.replace(/&#39;/g, "\'");
+        var newStr = newStr.replace(/&#34;/g, '\"');
+
+        // var newStr = unescape(newStr);
+        console.log(newStr);
         try {
             var js_array = JSON.parse(newStr);
         } catch (e) {

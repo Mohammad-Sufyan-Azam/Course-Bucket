@@ -6,4 +6,9 @@ def readData():
         data = pickle.load(f)
     return data
 
-print(readData())
+result = readData()
+print(result.keys())
+
+# Write the data to the pickle file
+# with open('metadata_mapping.pkl', 'wb') as f:
+#     pickle.dump(result, f)
