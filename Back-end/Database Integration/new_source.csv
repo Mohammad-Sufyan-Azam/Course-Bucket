@@ -1,11 +1,11 @@
 local_course_id, course_name, course_description, university, course_url, price
-CS101, Introduction to Machine Learning, A beginner-friendly course on ML concepts and applications., IIIT Delhi, https://example.com/cs101, 49.99
-NLP202, Natural Language Processing Fundamentals, Explore the basics of NLP with hands-on exercises., IIIT Delhi, https://example.com/nlp202, 59.99
-AI301, Advanced Artificial Intelligence, In-depth coverage of advanced AI algorithms and techniques., IIIT Delhi, https://example.com/ai301, 79.99
-CSAM401, Applied Mathematics in Computer Science, An interdisciplinary course integrating math with CS concepts., IIIT Delhi, https://example.com/csam401, 69.99
-WEBDEV101, Web Development Basics, Learn the fundamentals of web development with practical projects., IIIT Delhi, https://example.com/webdev101, 39.99
-DS501, Data Science for Beginners, Introduction to data science and its applications., IIIT Delhi, https://example.com/ds501, 49.99
-DBMS303, Database Management Systems, Hands-on experience in designing and managing databases., IIIT Delhi, https://example.com/dbms303, 59.99
-MLPRACTICE, Machine Learning in Practice, Apply ML concepts to real-world scenarios through projects., IIIT Delhi, https://example.com/mlpractice, 69.99
-CLOUD202, Cloud Computing Essentials, Explore cloud technologies and their impact on modern computing., IIIT Delhi, https://example.com/cloud202, 79.99
-SECURITY401, Cybersecurity Principles, Understanding cybersecurity fundamentals and best practices., IIIT Delhi, https://example.com/security401, 89.99
+'CS101', 'Introduction to Machine Learning', 'A beginner-friendly course on ML concepts and applications.', 'IIIT Delhi', 'https://example.com/cs101', 49.99
+'NLP202', 'Natural Language Processing Fundamentals', 'Explore the basics of NLP with hands-on exercises.', 'IIIT Delhi', 'https://example.com/nlp202', 59.99
+'AI301', 'Advanced Artificial Intelligence', 'In-depth coverage of advanced AI algorithms and techniques.', 'IIIT Delhi', 'https://example.com/ai301', 79.99
+'CSAM401', 'Applied Mathematics in Computer Science', 'An interdisciplinary course integrating math with CS concepts.', 'IIIT Delhi', 'https://example.com/csam401', 69.99
+'WEBDEV101', 'Web Development Basics', 'Learn the fundamentals of web development with practical projects.', 'IIIT Delhi', 'https://example.com/webdev101', 39.99
+'DS501', 'Data Science for Beginners', 'Introduction to data science and its applications.', 'IIIT Delhi', 'https://example.com/ds501', 49.99
+'DBMS303', 'Database Management Systems', 'Hands-on experience in designing and managing databases.', 'IIIT Delhi', 'https://example.com/dbms303', 59.99
+'MLPRACTICE', 'Machine Learning in Practice', 'Apply ML concepts to real-world scenarios through projects.', 'IIIT Delhi', 'https://example.com/mlpractice', 69.99
+'CLOUD202', 'Cloud Computing Essentials', 'Explore cloud technologies and their impact on modern computing.', 'IIIT Delhi', 'https://example.com/cloud202', 79.99
+'SECURITY401', 'Cybersecurity Principles', 'Understanding cybersecurity fundamentals and best practices.', 'IIIT Delhi', 'https://example.com/security401', 89.99

@@ -1,9 +1,9 @@
-# import mysql.connector as mysql
+import mysql.connector as mysql
 import pickle
 
-# mydb = mysql.connect(host='localhost', user='root', password='Unique@32')
-# mycursor = mydb.cursor()
-# mycursor.execute("USE nptel")
+mydb = mysql.connect(host='localhost', user='root', password='Unique@32')
+mycursor = mydb.cursor()
+mycursor.execute("USE nptel")
 
 # Global Schema
 global_schema = ['local_course_id', 'course_name', 'course_description', 'university', 'course_url', 'price', 'course_vendor']
@@ -80,6 +80,8 @@ def read_records(vendor_name):
         # The first line of the csv file contains the column names of the local vendor
         with open(csv_file, 'r') as f:
             col_names = f.readline()[:-1].split(',')
+            for i in range(len(col_names)):
+                col_names[i] = col_names[i].strip()
             for line in f:
                 # If \n is present at the end of the line, then remove it
                 if line[-1] == '\n':
@@ -143,8 +145,8 @@ def add_local_source(vendor_name):
     query += ")"
     print('Query is: ')
     print(query)
-    # mycursor.execute(query)
-    # mydb.commit()
+    mycursor.execute(query)
+    mydb.commit()
     print('Table created!')
 
     records_tuple = []
@@ -168,16 +170,16 @@ def add_local_source(vendor_name):
     print('Query is: ')
     print(query)
 
-    # mycursor.execute(query)
-    # mydb.commit()      
+    mycursor.execute(query)
+    mydb.commit()      
     
     # Local vendor is created now
 
 def delete_local_source(vendor_name):
     # Now writing a query to delete the table for the vendor
     query = "DROP TABLE " + vendor_name
-    # mycursor.execute(query)
-    # mydb.commit()
+    mycursor.execute(query)
+    mydb.commit()
     
     delete_vendor_schema(vendor_name)
 
@@ -217,7 +219,7 @@ def __add_vendor_to_warehouse(vendor_name):
     vendor_schema = mapping_metadata[vendor_name]
 
     # Now writing a query to add the records from the vendor to the warehouse, using the vendor_schema
-    query = "INSERT INTO course_details (" +global_schema.join(", ") + ") SELECT "
+    query = "INSERT INTO course_bucket (" +(", ").join(global_schema) + ") SELECT "
     for col_name in global_schema:
         if col_name in vendor_schema:
             query += vendor_schema[col_name] + ", "
@@ -227,16 +229,18 @@ def __add_vendor_to_warehouse(vendor_name):
     query += " FROM " + vendor_name
 
     # Executing the query
-    # mycursor.execute(query)
-    # mydb.commit()
+    print('----------------------------------------------------------------------')
+    print(query)
+    mycursor.execute(query)
+    mydb.commit()
 
 def __delete_vendor_from_warehouse(vendor_name):
     # Now writing a query to add the records from the vendor to the warehouse, using the vendor_schema
-    query = "DELETE FROM course_details WHERE course_vendor = '" + vendor_name + "'"
+    query = "DELETE FROM course_bucket WHERE course_vendor = '" + vendor_name + "'"
 
     # Executing the query
-    # mycursor.execute(query)
-    # mydb.commit()
+    mycursor.execute(query)
+    mydb.commit()
 
 # Defining a refresh function to repopulate the global schema
 def refresh_CourseBucket():
@@ -247,7 +251,7 @@ def refresh_CourseBucket():
         mapping_metadata = pickle.load(f)
 
     # Get the list of vendors from the database
-    # mycursor.execute("SELECT DISTINCT course_vendor FROM course_details")
+    mycursor.execute("SELECT DISTINCT course_vendor FROM course_bucket")
     vendors = mycursor.fetchall()
     vendors = [vendor[0] for vendor in vendors]
 
@@ -275,7 +279,7 @@ def main_menu():
     print("1. Add a new vendor")
     print("2. Delete a vendor")
     print("3. View the list of vendors")
-    print("4. View the schema of a vendor")
+    print("4. View the schema mapping of a vendor")
     print("5. View the global schema")
     print("6. Exit")
     choice = int(input("Enter your choice: "))
