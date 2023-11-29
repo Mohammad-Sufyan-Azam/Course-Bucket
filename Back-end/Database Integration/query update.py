@@ -1,4 +1,5 @@
 import mysql.connector as mysql
+import pickle
 
 mydb = mysql.connect(host='localhost', user='root', password='Unique@32')
 mycursor = mydb.cursor()
@@ -86,7 +87,9 @@ def find_mapping(table_name, columns, global_columns):
             'course_vendor': '"coursera"'
         }
     else:
-        mapping = {}
+        with open('metadata_mapping.pkl', 'rb') as f:
+            mapping = pickle.load(f)
+        return mapping[table_name]
     
     return mapping
 
@@ -97,7 +100,7 @@ def get_columns(table_name):
     return columns
 
 
-def update_table(actual_query, table_name, table_columns, table_description, execution=False, values=None, delete=None):
+def update_table(actual_query, table_name, table_columns, table_description, execution=False, values=None, delete=None, update=None):
     # Execute actual_query
     print('----------------------------ACTUAL--QUERY--------------------------------')
     print(actual_query)
@@ -126,11 +129,11 @@ def update_table(actual_query, table_name, table_columns, table_description, exe
         value_mapping = {}
         for i in range(len(values)):
             value_mapping[table_columns[i]] = values[i]
-        print(value_mapping)
+        # print(value_mapping)
 
         mapped_query += value_mapping[mapped_dic['local_course_id']]+", '"+value_mapping[mapped_dic['course_name']]+"', "
         # mapped_query += value_mapping[mapped_dic['course_description']]
-        print(mapped_query)
+        # print(mapped_query)
 
         course_descr = mapped_dic['course_description']
         # Check if the course_descr is a string or a function by looking for the word CONCAT
@@ -171,50 +174,129 @@ def update_table(actual_query, table_name, table_columns, table_description, exe
     elif query[0].lower() == 'delete':
         # Delete the record from the db table
         mapped_query += f'DELETE FROM {global_table_name} WHERE '
-        if 'where' in query:
-            where_clause = actual_query.split('where ')[1].split(' and ')
-            where_clause[-1] = where_clause[-1][:-1]
-            for i in range(len(where_clause)):
-                if '=' in where_clause[i]:
-                    key, value = where_clause[i].split('=')
+        delete = delete.strip()
+        if delete != '':
+            # delete contains the where clause
+            # iterate over delete and replace col_names with value_mapping and mapping_dic if it exists
+            delete = delete.split(' and ')
+            for i in range(len(delete)):
+                if '=' in delete[i]:
+                    key, value = delete[i].split('=')
                     cmp_operator = '='
-                elif 'like' in where_clause[i]:
-                    key, value = where_clause[i].split('like')
+                elif 'like' in delete[i]:
+                    key, value = delete[i].split('like')
                     cmp_operator = 'like'
-                elif '>' in where_clause[i]:
-                    key, value = where_clause[i].split('>')
+                elif '>' in delete[i]:
+                    key, value = delete[i].split('>')
                     cmp_operator = '>'
-                elif '<' in where_clause[i]:
-                    key, value = where_clause[i].split('<')
+                elif '<' in delete[i]:
+                    key, value = delete[i].split('<')
                     cmp_operator = '<'
                 else:
-                    key, value = where_clause[i].split('in')
+                    key, value = delete[i].split('in')
+                    cmp_operator = 'in'
+
+                key = key.strip()   # this is the key in the local table
+                value = value.strip()   # this is the value in the local table
+                # print(key, value)
+                # search mapped_dic.values() for the key (reverse mapping)
+                foundKey = False
+                for k, v in mapped_dic.items():
+                    if v == key:
+                        global_mapped_key = k   # this is the key in the global table
+                        foundKey = True
+                        break
+                
+                if not foundKey:
+                    break
+
+                # all keys are present in the value_mapping
+                # do the value_mapping for all keys
+                mapped_query += global_mapped_key+" "+cmp_operator+" "+value+' and '
+            
+            if not foundKey:
+                # no mapping found; refresh the global table
+                mapped_query = f"DELETE FROM {global_table_name} WHERE course_vendor = '{table_name}';"
+                if execution:
+                    mycursor.execute(mapped_query)
+                    mydb.commit()
+                # print(mapped_query)
+                mapped_query = f"INSERT INTO {global_table_name} (local_course_id, course_name, course_description, university, course_url, price, course_vendor) SELECT "
+                for k, v in mapped_dic.items():
+                    mapped_query += v+', '
+                mapped_query = mapped_query[:-2]+' '
+                mapped_query += f"FROM {table_name};"
+            else:
+                mapped_query = mapped_query[:-5]+f" and course_vendor = '{table_name}';"
+        else:
+            mapped_query += f' course_vendor = "{table_name}";'
+
+
+    elif query[0].lower() == 'update':
+        if update != '':
+            mapped_query = f"DELETE FROM {global_table_name} WHERE course_vendor = '{table_name}';"
+            if execution:
+                mycursor.execute(mapped_query)
+                mydb.commit()
+            # print(mapped_query)
+            mapped_query = f"INSERT INTO {global_table_name} (local_course_id, course_name, course_description, university, course_url, price, course_vendor) SELECT "
+            for k, v in mapped_dic.items():
+                mapped_query += v+', '
+            mapped_query = mapped_query[:-2]+' '
+            mapped_query += f"FROM {table_name};"
+        else:
+            where = delete
+            mapped_query += 'UPDATE '+global_table_name+' SET '
+            # check for mapping in the update variable
+            update = update.split(',')
+            update = [i.strip() for i in update]
+            # check if all attributes are in the update are present in the global table or not
+            for i in range(len(update)):
+                if '=' in update[i]:
+                    key, value = update[i].split('=')
+                    cmp_operator = '='
+                elif 'like' in update[i]:
+                    key, value = update[i].split('like')
+                    cmp_operator = 'like'
+                elif '>' in update[i]:
+                    key, value = update[i].split('>')
+                    cmp_operator = '>'
+                elif '<' in update[i]:
+                    key, value = update[i].split('<')
+                    cmp_operator = '<'
+                else:
+                    key, value = update[i].split('in')
                     cmp_operator = 'in'
 
                 key = key.strip()
                 value = value.strip()
                 print(key, value)
-                # search mapped_dic.values() for the key
+                # search mapped_dic.values() for the key (reverse mapping)
+                foundKey = False
                 for k, v in mapped_dic.items():
                     if v == key:
-                        key = k
+                        global_mapped_key = k
+                        foundKey = True
                         break
-                # find the value in the value_mapping
-                # if value in value_mapping:
-                #     value = value_mapping[value]
-                # else:
-                #     value = "'"+value+"'"
-                where_clause[i] = key+' '+cmp_operator+' '+value
-            where_clause = ' and '.join(where_clause)
+                
+                if not foundKey:
+                    break
             
-            print(where_clause)
-            mapped_query += where_clause
-        mapped_query += f' and course_vendor = "{table_name}";'
-
-
-    elif query[0].lower() == 'update':
-        # Update the record in the db table
-        mapped_query += 'UPDATE '+global_table_name+' SET '
+            if not foundKey:
+                # no mapping found; refresh the global table
+                mapped_query = f"DELETE FROM {global_table_name} WHERE course_vendor = '{table_name}';"
+                if execution:
+                    mycursor.execute(mapped_query)
+                    mydb.commit()
+                print(mapped_query)
+                mapped_query = f"INSERT INTO {global_table_name} (local_course_id, course_name, course_description, university, course_url, price, course_vendor) SELECT "
+                for i in range(len(table_columns)):
+                    if i == len(table_columns)-1:
+                        mapped_query += table_columns[i]+' '
+                    else:
+                        mapped_query += table_columns[i]+', '
+                mapped_query += f"FROM {table_name};"
+            pass
     print('-------------------------MAPPED---QUERY----------------------------------')
     print(mapped_query)
     print('-------------------------------------------------------------------------')
@@ -235,7 +317,7 @@ def take_input():
     return table_name, table_columns, table_description
 
 
-def main():
+def main(execution=True):
     # creating a main menu with insert, delete, update and exit options for each database table
     print("Welcome to the main menu!")
     
@@ -272,7 +354,7 @@ def main():
             query += ');'
             print(query)
 
-            update_table(query, table_name, table_columns, table_description, execution=False, values=values)
+            update_table(query, table_name, table_columns, table_description, execution=execution, values=values)
         
         elif choice == 2:
             table_name, table_columns, table_description = take_input()
@@ -284,7 +366,7 @@ def main():
             query = f"DELETE FROM {table_name} WHERE {delete};"
             print(query)
 
-            update_table(query, table_name, table_columns, table_description, execution=False, delete=delete)
+            update_table(query, table_name, table_columns, table_description, execution=execution, delete=delete)
 
         elif choice == 3:
             table_name, table_columns, table_description = take_input()
@@ -300,7 +382,7 @@ def main():
                 query += ';'
             print(query)
 
-            update_table(query, table_name, table_columns, table_description, execution=False)
+            update_table(query, table_name, table_columns, table_description, execution=execution, update=update, delete=where)
 
         else:
             print("Invalid choice!")
@@ -312,14 +394,14 @@ def main():
         print("4. Exit")
         choice = int(input("Enter your choice: "))
 
-main()
+main(execution=True)
 
-table_name = 'skillshare'
-mycursor.execute("SHOW COLUMNS FROM "+table_name)
-res = mycursor.fetchall()
-table_columns = [i[0] for i in res]
-table_description = [i[1] for i in res]
-table_description = [i.decode('utf-8') for i in table_description]
+# table_name = 'skillshare'
+# mycursor.execute("SHOW COLUMNS FROM "+table_name)
+# res = mycursor.fetchall()
+# table_columns = [i[0] for i in res]
+# table_description = [i[1] for i in res]
+# table_description = [i.decode('utf-8') for i in table_description]
 # query = '''INSERT INTO skillshare (id, Title, URL, students_count, course_duration, instructor, lessions_count, level, student_projects, engaging, clarity, quality, price) VALUES 
 # (29999, 'Learn How to Create a WordPress Website', 'https://www.skillshare.com/classes/Learn-How-to-Create-a-WordPress-Website/2126456149?via=browse-rating-wordpress-layout-grid', '0', '2.5 hours', 'Darrel Wilson', '21', 'Beginner', '1', '4.5', '4.5', '4.5', 80000);'''
 # values = ['29999', 'Learn How to Create a WordPress Website', 'https://www.skillshare.com/classes/Learn-How-to-Create-a-WordPress-Website/2126456149?via=browse-rating-wordpress-layout-grid', '0', '2.5 hours', 'Darrel Wilson', '21', 'Beginner', '1', '4.5', '4.5', '4.5', '80000']
@@ -340,9 +422,14 @@ table_description = [i.decode('utf-8') for i in table_description]
 # values = ['1111', 'Introductory Financial Accounting', 'https://www.udemy.com/introductory-financial-accounting/', 'True', '80', '1793', '265', '54', 'Beginner Level', '10', '2012-10-03T03:20:10Z', 'Business Finance'
 # ]
 
-query = '''DELETE FROM skillshare WHERE id = 29999;'''
-delete = 'id = 29999'
-# update_table(query, table_name, table_columns, table_description, execution=False, delete=delete)
+# query = '''DELETE FROM skillshare WHERE Title = 'Learn How to Create a WordPress Website' and Course_Rating='4.5';'''
+# delete = "Title = 'Learn How to Create a WordPress Website' and Course_Rating='4.5'"
+
+# update query
+# query = '''UPDATE skillshare SET id = 4344 WHERE Title = 'Learn How to Create a WordPress Website' and Course_Rating='4.5';'''
+# update = "id = 4344"
+# delete = "Title = 'Learn How to Create a WordPress Website' and Course_Rating='4.5'"
+# update_table(query, table_name, table_columns, table_description, execution=False, update=update, delete=delete)
 
 
 
